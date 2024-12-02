@@ -1,0 +1,84 @@
+.mainHeading{
+    letter-spacing: -.96px;
+    font-size: 48px;
+    color: #4F4F4F;
+}
+.StepContainer{
+    position: relative;
+}
+.StepLine{
+    position: absolute;
+    top: 40px;
+    width: calc(100% - 240px);
+    border-color: rgb(177 177 177);
+    border-style: solid;
+    border-width: 1px;
+    z-index: -1;
+}
+
+.StepWrapper{
+    display: flex;
+    justify-content: space-between;
+    width: calc(100% - 240px);
+}
+
+
+
+
+
+.StepCard{
+z-index: 10;
+position: relative;
+background-color: white;
+
+}
+
+.firstStepImage{
+    background-position: 0 0;
+    width: 64px;
+    height: 64px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url('../../assets/icons/steps.png');
+}
+
+.secondStepImage{
+    background-position: -64px 7px;
+    width: 64px;
+    height: 64px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url('../../assets/icons/steps.png');
+}
+
+.thirdStepImage{
+    background-position: -128px 0;
+    width: 64px;
+    height: 64px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url('../../assets/icons/steps.png');
+}
+
+.forthStepImage{
+    background-position: -192px 0;
+    width: 64px;
+    height: 64px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url('../../assets/icons/steps.png');
+}
+
+.StepCount{
+
+}
+
+.StepPara{
+ width: 150px;
+}
+
+
+
+.marginBottom{
+    margin-bottom: 1000px;
+}

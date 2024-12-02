@@ -1,0 +1,293 @@
+/* ------------------------Parent container & background Blur------------------------- */
+
+.parentContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100dvh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.backgroundBlur{
+    position: absolute;
+    /* overflow: hidden; */
+    width: 100vw;
+    /* height: 100vh; */
+    top: 0;
+    left: 0;
+    background: linear-gradient(to right, #fdfdfd, #fdfdfd);
+    display: flex;
+    flex-grow: 1;
+    z-index: -1;
+}
+.backgroundBlur div {
+    position: absolute;
+    border-radius: 100%;
+    height: 0;
+    filter: blur(200px);
+    opacity: .4;
+}
+.backgroundBlur div:nth-child(1) {
+    background: linear-gradient(132deg, #FF9A01 0%, #FF9A01 100%);
+    width: 15%;
+    padding-top: 70%;
+    left: 5%;
+    top: 70%;
+    transform: translate(-50%) translateY(-50%);
+}
+.backgroundBlur div:nth-child(2) {
+    background: linear-gradient(132deg, #D75EFD 0%, #D75EFD 100%);
+    width: 17%;
+    padding-top: 68%;
+    left: 100% !important;
+    top: -40% !important;
+    transform: translate(-80%) translateY(20%);
+    rotate: 90deg;
+}
+.backgroundBlur div:nth-child(3) {
+    background: linear-gradient(132deg, #60ECBA 0%, #60ECBA 100%);
+    width: 25%;
+    padding-top: 70%;
+    left: 50%;
+    bottom: 5%;
+    transform: translate(-50%) translateY(20%);
+}
+
+
+
+
+/* -------------------------------Left Container ---------------------------------------- */
+
+.leftContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: calc(100vh - 100px);
+    max-height: 725px !important;
+}
+
+
+.d_flex{
+    display: flex;
+}
+
+.lighting_strike{
+    width: 30px;
+    height: 60px;
+    margin-right: 8px;
+}
+
+.LightningText {
+    font-size: 20px;
+    margin-bottom: 10px;
+    margin-top: 0;
+    line-height: 20px;
+    color: #817E7E;
+}
+
+.TradingNInvesting {
+    font-size: 24px;
+    color: #4f4f4f;
+    font-weight: bolder;
+    line-height: 20px;
+    margin-top: 0;
+    
+}
+
+.StocksText {
+    color: #f05156;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.fadeOut {
+    opacity: 0;
+    transform: translateY(0);
+}
+
+.fadeIn {
+    opacity: 1;
+    transform: translateY(-20px);
+}
+
+.animate {
+    animation: fadeOut 0.5s ease-in-out forwards, fadeIn 0.5s ease-in-out forwards 0.5s;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+/* ----------------------Right Container----------------------------- */
+.rightContainer {
+    width: 450px;
+    height: calc(100vh - 100px);
+    max-height: 646px !important;
+    border-radius: 20px;
+    box-shadow: 0 0 15px 3px #817e7e1a;
+    background-color: #fff !important;
+    min-height: 550px;
+    position: relative;
+    display: flex;
+    flex-direction: column; 
+}
+
+
+.registerContent::before{
+    position: absolute;
+    content: url(../assets/icons/leftLoginImage.svg);
+    left: -300px;
+    top: 0;
+    z-index: -1;
+}
+.registerContent{
+    margin: 0 55px 5px;
+    position: relative;
+    height: 100%;
+}
+
+.registerContent::after {
+    position: absolute;
+    content: url(../assets/icons/rightLoginImage.svg);
+    right: -250px;
+    bottom: 0;
+    z-index: -1;
+    overflow: hidden;
+
+}
+.registerLog{
+    margin-top: 78px;
+    height: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rightLogo {
+    width: 20%;
+    margin: 0 auto;
+}
+
+.createAccountText {
+    font-family: 'CircularXXWeb', sans-serif;
+    font-weight: 700;
+    color: #4f4f4f;
+    margin-top: 30px; 
+}
+
+.form__input_group {
+    margin: 15px 0;
+    width: 100%;
+    position: relative;
+    display: flex;
+}
+
+.form__input {
+    width: 100%;
+    border: 1px solid #e4e4e4;
+    border-radius: 8px;
+    transition: border 0.25s ease-in-out;
+    height: 50px !important;
+    color: #4f4f4f !important;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 400;
+}
+.form__input:focus {
+    border: 1px solid #e4e4e4;
+    outline: none;
+}
+.mobileprefix{
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(-40%,-50%);
+}
+
+.form__input_label {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    transition: all 0.25s ease-in-out;
+    font-size: 14px;
+}
+
+.form__input_label {
+    top: 0;
+    background-color: #ffffff;
+    font-size: 12px;
+    padding: 0 5px;
+    color: #777;
+    font-weight: 400;
+}
+.errorText{
+    font-size: 12px;
+    line-height: 18px;
+    color: #dd6565;
+}
+.checkBoxContainer{
+    font-size: 12px;
+    padding-left: 5px;
+}
+.Button{
+    background-image: linear-gradient(to top, #f73439, #f8777b) !important;
+    margin-top: .8rem !important;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 400;
+    font-stretch: normal;
+    line-height: 1.13;
+    color: #fff;
+    height: 44px;
+    border-radius: 8px !important;
+    border: none;
+}
+
+
+
+@media (max-width: 1150px) {
+    .leftContainer{
+        display: none;
+    }
+
+    .rightContainer {
+        margin: 0 20px;
+    }
+
+}
+@media (max-width: 440px) {
+    .registerContent{
+        margin: 20px;
+    }
+
+}
+
