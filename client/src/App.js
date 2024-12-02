@@ -6,14 +6,14 @@ import Homepage from './components/Homepage';
 function App() {
   return (
     <>
-    <Routes>
-            <Route path="/" element={<Homepage />} />
-            {/* <Route path="/create_profile" element={<ProfilePage />} /> */}
-          </Routes>
-          <Toaster
-            position="top-center"
-            toastOptions={{ style: { width: "300px ", fontSize: "20px" } }}
-          />
+      <Routes>
+        <Route path="/" element={<Homepage />} />
+        {/* <Route path="/create_profile" element={<ProfilePage />} /> */}
+      </Routes>
+      <Toaster
+        position="top-center"
+        toastOptions={{ style: { width: "300px ", fontSize: "20px" } }}
+      />
     </>
   );
 }
