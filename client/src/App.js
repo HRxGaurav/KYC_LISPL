@@ -5,7 +5,7 @@ import Homepage from './components/Homepage';
 
 function App() {
   return (
-    <> 
+    <>
     <Routes>
             <Route path="/" element={<Homepage />} />
             {/* <Route path="/create_profile" element={<ProfilePage />} /> */}
