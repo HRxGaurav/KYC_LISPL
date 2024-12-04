@@ -253,6 +253,7 @@
     font-size: 12px;
     line-height: 18px;
     color: #dd6565;
+    margin-left: 5px;
 }
 .checkBoxContainer{
     font-size: 12px;
@@ -270,9 +271,8 @@
     height: 44px;
     border-radius: 8px !important;
     border: none;
+    cursor: pointer;
 }
-
-
 
 @media (max-width: 1150px) {
     .leftContainer{
@@ -289,5 +289,177 @@
         margin: 20px;
     }
 
+}
+
+
+/* ------------------------------Stepper ---------------------------------- */
+.stepperContainer {
+    width: 100%;
+    padding: 20px 0;
+    margin-top: -50px;
+  }
+  
+  .stepperWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
+  .stepperWrapper::before {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: #e4e4e4;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+  
+  .stepperItem {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    z-index: 2;
+  }
+  
+  .stepCounter {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #e4e4e4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 6px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .stepName {
+    font-size: 14px;
+    color: #817E7E;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .stepperItem.active .stepCounter {
+    border-color: #f05156;
+    color: #f05156;
+  }
+  
+  .stepperItem.active .stepName {
+    color: #f05156;
+  }
+  
+  .stepperItem.completed .stepCounter {
+    background-color: #f05156;
+    border-color: #f05156;
+    color: #fff;
+  }
+  
+  .stepperItem.completed .stepName {
+    color: #4f4f4f;
+  }
+  
+  /* Add a line between steps that updates with progress */
+  .stepperItem.completed::after {
+    position: absolute;
+    content: '';
+    width: 100%;
+    height: 2px;
+    background-color: #f05156;
+    top: 15px;
+    left: 50%;
+    z-index: -1;
+  }
+  
+  /* Adjust the line for the last item */
+  .stepperItem:last-child::after {
+    display: none;
+  }
+
+
+/* ------------------------------- OTP Component-------------------------- */
+.OTPTextContainer{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+}
+
+.OTPTextContainer h4{
+    font-size: 16px;
+    font-weight: 500;
+    font-stretch: normal;
+    line-height: 1.13;
+    color: #404040bf;
+}
+
+.OTPIcon{
+    cursor: pointer;
+}
+
+.otpInput {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 0.3rem;
+    text-align: center;
+    font-size: 1.2rem;
+    border: 1px solid #e4e4e4;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    color: #4f4f4f;
+    margin-top: -20px;
+}
+
+.otpInput:focus {
+    border-color: #f05156;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(240, 81, 86, 0.1);
+}
+
+/* .otpInput:hover {
+    border-color: #f05156;
+} */
+
+.resendContainer {
+  margin: 15px 0;
+}
+
+.timerText {
+  color: #4f4f4f;
+  font-size: 14px;
+}
+
+.timerText span {
+  color: #f05156;
+  font-weight: 600;
+}
+
+.resendText {
+  font-size: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.resendText.enabled {
+  color: #f05156;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.resendText.enabled:hover {
+  opacity: 0.8;
+}
+
+.resendText.disabled {
+  color: #817E7E;
+  cursor: not-allowed;
 }
 

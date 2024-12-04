@@ -22,6 +22,9 @@ app.use('/models', express.static(path.join(__dirname, 'models')));
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve static files from the assets directory
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
 dotenv.config();
 const PORT = process.env.PORT || 9000;
 

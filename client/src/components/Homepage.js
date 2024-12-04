@@ -4,6 +4,9 @@ import fullLogo from '../assets/icons/fullLogo.png'
 import styles from './Homepage.module.css'
 import light from '../assets/icons/light-striking.svg'
 import mobileprefix from '../assets/icons/mobileprefix.svg'
+import editIcon from '../assets/icons/edit_icon.svg';
+import OTPIcon from '../assets/icons/PINorOTPIcon.svg';
+import EmailIcon from '../assets/icons/emailIcon.svg';
 import Footer from './Footer';
 
 
@@ -16,7 +19,7 @@ const Homepage = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [mobileOTP, setMobileOTP] = useState('');
   const [error, setError] = useState('');
-  const[page, setPage] = useState(0);
+  const [page, setPage] = useState(0);
   const [email, setEmail] = useState('');
   const [timer, setTimer] = useState(30);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
@@ -36,13 +39,13 @@ const Homepage = () => {
 
   useEffect(() => {
     if (timer > 0) {
-        const countdown = setInterval(() => {
-            setTimer((prevTimer) => prevTimer - 1);
-        }, 1000);
+      const countdown = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
 
-        return () => clearInterval(countdown);
+      return () => clearInterval(countdown);
     } else {
-        setIsResendEnabled(true);
+      setIsResendEnabled(true);
     }
   }, [timer]);
 
@@ -60,59 +63,6 @@ const Homepage = () => {
     }
   };
 
-  const handleMobileProceed = async () => {
-    if (mobileNumber.length < 10) {
-      setError('Enter Mobile Number');
-      return
-    }
-    try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send_mobile_otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ mobileNumber }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // Handle successful OTP send (e.g., navigate to the next page or show a success message)
-            console.log(data.message); // You can show this message to the user
-            setPage(1); // Move to the next page
-        } else {
-            // Handle error response
-            setError(data.message);
-        }
-    } catch (error) {
-        console.error('Error sending OTP:', error);
-        setError('Failed to send OTP. Please try again.');
-    }
-  };
-
-  const validateMobileOTP = () =>{
-    setPage(1)
-  }
-
-  const handleOTPChange = (e) => {
-    const value = e.target.value;
-    if (/^\d{0,6}$/.test(value)) {  // Only allow up to 6 digits
-        setMobileOTP(value);
-        setError('');
-    }
-  };
-
-  const resendOTP = () => {
-    if (isResendEnabled) {
-        // Logic to resend OTP
-        console.log('Resending OTP...');
-        
-        // Reset timer
-        setTimer(30);
-        setIsResendEnabled(false);
-    }
-  };
-
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -126,18 +76,220 @@ const Homepage = () => {
 
   const handleEmailBlur = () => {
     if (!email) {
-        setError('Email is required');
+      setError('Email is required');
     } else if (!validateEmail(email)) {
-        setError('Please enter a valid email address');
+      setError('Please enter a valid email address');
     } else {
-        setError('');
+      setError('');
     }
   };
+
+  const handleOTPKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !mobileOTP[index] && index > 0) {
+      document.getElementById(`otp-input-${index - 1}`).focus();
+    }
+  };
+
+  
+
+  const handleMobileProceed = async () => {
+    if (mobileNumber.length < 10) {
+      setError('Enter Mobile Number');
+      return
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send_mobile_otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mobileNumber }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Handle successful OTP send (e.g., navigate to the next page or show a success message)
+
+        console.log(data.message); // You can show this message to the user
+        setPage(1); // Move to the next page
+        setError('')
+
+        // Store the token in local storage
+        localStorage.setItem('authToken', data.token);
+
+        // Start the timer when OTP is sent successfully
+        setTimer(30);
+        setIsResendEnabled(false);
+      } else {
+        // Handle error response
+        setError(data.message);
+      }
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      setError('Failed to send OTP. Please try again.');
+    }
+  };
+
+  const validateMobileOTP = async () => {
+    try {
+      // Check if OTP is 6 digits
+      if (!mobileOTP || mobileOTP.length !== 6 || !/^\d+$/.test(mobileOTP)) {
+        setError('Please enter a valid 6-digit OTP');
+        return;
+      }
+
+      const token = localStorage.getItem('authToken');
+
+      if (!token) {
+        setError('Session expired. Redirecting to home.');
+        setTimeout(() => {
+            setPage(0);
+        }, 3000);
+        return;
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/verify_mobile_otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ otp: mobileOTP })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to verify OTP');
+      }
+
+      // Update max step completed if needed
+      if (data.max_step_completed !== undefined) {
+
+      }
+
+      setPage(2)
+      setError(''); // Clear any existing errors
+
+    } catch (error) {
+      if (error.message === 'Session expired') {
+        localStorage.removeItem('token');
+      }
+      setError(error.message || 'Failed to verify OTP');
+    }
+  };
+
+  const handleOTPInputChange = (e, index) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value) && value.length <= 1) {
+      const newOTP = mobileOTP.split('');
+      newOTP[index] = value;
+      setMobileOTP(newOTP.join(''));
+
+      // Move focus to next input if current input is filled
+      if (value && index < 5) {
+        document.getElementById(`otp-input-${index + 1}`).focus();
+      }
+    }
+  };
+  
+  const resendOTP = async () => {
+    if (!isResendEnabled) return;
+
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/resend_mobile_otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Add token to headers
+        },
+        body: JSON.stringify({
+          mobileNumber,
+          token // Also include token in body if needed by your API
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update token if new one is sent
+        if (data.token) {
+          localStorage.setItem('authToken', data.token);
+        }
+
+        setTimer(30);
+        setIsResendEnabled(false);
+        setError('');
+      } else {
+        setError(data.message || 'Failed to resend OTP');
+      }
+    } catch (error) {
+      console.error('Error resending OTP:', error);
+      setError('Failed to resend OTP. Please try again.');
+    }
+  };
+
+  const handleEmailProceed = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email || !emailRegex.test(email)) {
+        setError('Please enter a valid email address');
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            setError('Session expired. Please try again.');
+            setPage(0);
+            return;
+        }
+
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send_email_otp`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            setError('');
+            setPage(3); // Move to email OTP verification page
+            // You might want to start a timer here similar to mobile OTP
+            setTimer(30);
+            setIsResendEnabled(false);
+        } else {
+            setError(data.message || 'Failed to send email OTP');
+            if (response.status === 401) {
+                // Handle session expiry
+                localStorage.removeItem('authToken');
+                setPage(0);
+            }
+        }
+    } catch (error) {
+        console.error('Error sending email OTP:', error);
+        setError('Failed to send email OTP. Please try again.');
+    }
+  };
+
+
+
+
+  // localStorage.setItem('authToken', newToken);
+  // localStorage.removeItem('authToken');
 
   return (
     <>
       <div className={styles.parentContainer}>
-        <div class={styles.backgroundBlur}>
+        <div className={styles.backgroundBlur}>
           <div ></div>
           <div ></div>
           <div ></div>
@@ -167,7 +319,7 @@ const Homepage = () => {
 
         <div className={styles.rightContainer}>
 
-          {page===0 && <div className={styles.registerContent}>
+          {page === 0 && <div className={styles.registerContent}>
             <div className={styles.registerLog}>
               <img src={logo} alt='logo' className={styles.rightLogo} />
               <h2 className={styles.createAccountText}>Create Your Account</h2>
@@ -200,46 +352,97 @@ const Homepage = () => {
 
           </div>}
 
-          {page===1 && <div className={styles.registerContent}>
+          {page > 0 && <div className={styles.registerContent}>
             <div className={styles.registerLog}>
               <img src={logo} alt='logo' className={styles.rightLogo} />
               <h2 className={styles.createAccountText}>Mobile OTP</h2>
             </div>
 
-
-
-              <div>
-                <h4>{mobileNumber}</h4>
-                
+            <div className={styles.stepperContainer}>
+              <div className={styles.stepperWrapper}>
+                <div className={`${styles.stepperItem} ${page >= 1 ? styles.active : ''} ${page > 1 ? styles.completed : ''}`}>
+                  <div className={styles.stepCounter}>1</div>
+                  <div className={styles.stepName}>Phone</div>
+                </div>
+                <div className={`${styles.stepperItem} ${page >= 2 ? styles.active : ''}`}>
+                  <div className={styles.stepCounter}>2</div>
+                  <div className={styles.stepName}>Email</div>
+                </div>
               </div>
-            <div className={styles.form__input_group}>
+            </div>
+
+
+            {page === 1 && 
+            <>
+              <div className={styles.OTPTextContainer}>
+                <img src={OTPIcon} alt='OTP_ICON' className={styles.OTPIcon} />
+                <h4> Enter OTP sent to {mobileNumber}</h4>
+                <img onClick={() => { setPage(0); setMobileOTP('') }} src={editIcon} alt='OTP_ICON' className={styles.OTPIcon} />
+
+              </div>
+
+              <div className={styles.form__input_group}>
+
+                {[...Array(6)].map((_, index) => (
+                  <input
+                    key={index}
+                    id={`otp-input-${index}`}
+                    className={styles.otpInput}
+                    type="text"
+                    value={mobileOTP[index] || ''}
+                    onChange={(e) => handleOTPInputChange(e, index)}
+                    onKeyDown={(e) => handleOTPKeyDown(e, index)}
+                    maxLength={1}
+                  />
+                ))}
+
+              </div>
+              {error && <p className={styles.errorText}>{error}</p>}
+              <div className={styles.resendContainer}>
+                {timer > 0 ? (
+                  <p className={styles.timerText}>
+                    Resend OTP in <span>{timer}s</span>
+                  </p>
+                ) : (
+                  <p
+                    className={`${styles.timerText} ${isResendEnabled ? styles.enabled : styles.disabled}`}
+                    onClick={resendOTP}
+                  >
+                    OTP not received?<span className={styles.resendText} onClick={resendOTP}> Send Again</span>
+                  </p>
+                )}
+              </div>
+
+
+              <button className={styles.Button} onClick={validateMobileOTP}>Verify OTP</button>
+            </>}
+            
+            {page === 2 && <>
+
+              <div className={styles.form__input_group}>
               <input
                 className={styles.form__input}
-                type="text"
-                placeholder="Enter mobile OTP"
-                value={mobileOTP}
-                onChange={handleOTPChange}
-                maxLength={6}
+                type="email"
+                placeholder="Enter Email"
+                value={email}
+                onChange={handleEmailChange}
+                onBlur={handleEmailBlur}
               />
-              <label className={styles.form__input_label}>Mobile OTP </label>
-              <img src={mobileprefix} alt='mobile' className={styles.mobileprefix} />
+              <label className={styles.form__input_label}>Email </label>
+              <img src={EmailIcon} alt='mobile' className={styles.mobileprefix} />
             </div>
             {error && <p className={styles.errorText}>{error}</p>}
-            <p
-                onClick={resendOTP}
-                style={{ color: isResendEnabled ? 'black' : 'gray', cursor: isResendEnabled ? 'pointer' : 'default' }}
-            >
-                Resend OTP {timer > 0 && `in ${timer}s`}
-            </p>
 
-            
 
-            <button className={styles.Button} onClick={validateMobileOTP}>Verify OTP</button>
+            <button className={styles.Button} onClick={handleEmailProceed}>Proceed</button>
+
+            </>}
+
 
 
 
           </div>}
-          {page===3 && <div className={styles.registerContent}>
+          {page === 3 && <div className={styles.registerContent}>
             <div className={styles.registerLog}>
               <img src={logo} alt='logo' className={styles.rightLogo} />
               <h2 className={styles.createAccountText}>Mobile OTP</h2>
@@ -247,10 +450,10 @@ const Homepage = () => {
 
 
 
-              <div>
-                <h4>{mobileNumber}</h4>
-                
-              </div>
+            <div>
+              <h4>{mobileNumber}</h4>
+
+            </div>
             <div className={styles.form__input_group}>
               <input
                 className={styles.form__input}
@@ -264,9 +467,9 @@ const Homepage = () => {
               <img src={mobileprefix} alt='mobile' className={styles.mobileprefix} />
             </div>
             {error && <p className={styles.errorText}>{error}</p>}
-            
 
-            
+
+
 
             <button className={styles.Button} onClick={validateMobileOTP}>Verify OTP</button>
 
@@ -277,7 +480,7 @@ const Homepage = () => {
         </div>
       </div>
 
-      <Footer/>
+      {/* <Footer /> */}
     </>
   )
 }
