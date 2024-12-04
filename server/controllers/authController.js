@@ -22,15 +22,15 @@ const sendMobileOTP = async (req, res) => {
         // Check for existing user and send limit
         if (user && user.otp.send_limit_time) {
             const timeDiff = Date.now() - new Date(user.otp.send_limit_time).getTime();
-            const hourInMillis = 60 * 60 * 1000;
+            const thirtyMinutesInMillis = 30 * 60 * 1000; // 30 minutes in milliseconds
             
-            if (timeDiff < hourInMillis) {
-                const remainingMinutes = Math.ceil((hourInMillis - timeDiff) / (60 * 1000));
+            if (timeDiff < thirtyMinutesInMillis) {
+                const remainingMinutes = Math.ceil((thirtyMinutesInMillis - timeDiff) / (60 * 1000));
                 return res.status(429).json({ 
                     message: `Maximum OTP limit reached. Please try after ${remainingMinutes} minutes.`
                 });
             } else {
-                // Reset counter and remove limit time if hour has passed
+                // Reset counter and remove limit time if 30 minutes has passed
                 user.otp.send_cont = 0;
                 user.otp.send_limit_time = null;
             }
@@ -60,7 +60,7 @@ const sendMobileOTP = async (req, res) => {
                 user.otp.send_limit_time = new Date();
                 await user.save();
                 return res.status(429).json({ 
-                    message: 'Maximum OTP limit reached. Please try after 1 hour.'
+                    message: 'Maximum OTP limit reached. Please try after 30 minutes.'
                 });
             }
         }
@@ -108,15 +108,15 @@ const resendMobileOTP = async (req, res) => {
         // Check if send limit time exists and hasn't expired
         if (user.otp.send_limit_time) {
             const timeDiff = Date.now() - new Date(user.otp.send_limit_time).getTime();
-            const hourInMillis = 60 * 60 * 1000; // 1 hour in milliseconds
+            const thirtyMinutesInMillis = 30 * 60 * 1000; // 30 minutes in milliseconds
             
-            if (timeDiff < hourInMillis) {
-                const remainingMinutes = Math.ceil((hourInMillis - timeDiff) / (60 * 1000));
+            if (timeDiff < thirtyMinutesInMillis) {
+                const remainingMinutes = Math.ceil((thirtyMinutesInMillis - timeDiff) / (60 * 1000));
                 return res.status(429).json({ 
                     message: `Maximum OTP limit reached. Please try after ${remainingMinutes} minutes.`
                 });
             } else {
-                // Reset counter and remove limit time if hour has passed
+                // Reset counter and remove limit time if 30 minutes has passed
                 user.otp.send_cont = 0;
                 user.otp.send_limit_time = null;
             }
@@ -135,7 +135,7 @@ const resendMobileOTP = async (req, res) => {
             user.otp.send_limit_time = new Date();
             await user.save();
             return res.status(429).json({ 
-                message: 'Maximum OTP limit reached. Please try after 1 hour.'
+                message: 'Maximum OTP limit reached. Please try after 30 minutes.'
             });
         }
 
@@ -205,6 +205,8 @@ const verifyMobileOTP = async (req, res) => {
         // Clear OTP after successful verification
         user.otp.otp = null;
         user.otp.expiry = null;
+        user.otp.send_cont = 0;
+        user.otp.send_limit_time = null;
         await user.save();
 
         res.status(200).json({
@@ -247,7 +249,16 @@ const sendEmailOTP = async (req, res) => {
         const otp = 550055; // For development, using static OTP
         console.log('Email OTP:', otp);
 
-        // Configure nodemailer with custom SMTP settings
+        // Save user data
+        await user.save();
+
+        // Send success response immediately
+        res.status(200).json({ 
+            message: 'Email OTP sent successfully',
+            remainingAttempts: 5 - user.emailOtp.send_cont
+        });
+
+        // Handle email sending in the background
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,        // e.g., 'smtp.yourdomain.com'
             port: process.env.SMTP_PORT,        // e.g., 587 or 465
@@ -308,22 +319,19 @@ const sendEmailOTP = async (req, res) => {
             send_cont: (user.emailOtp?.send_cont || 0) + 1
         };
 
-        if (user.emailOtp.send_cont >= 25) {
+        if (user.emailOtp.send_cont >= 5  && false) {
             user.emailOtp.send_limit_time = new Date();
             await user.save();
             return res.status(429).json({ 
-                message: 'Maximum OTP limit reached. Please try after 1 hour.'
+                message: 'Maximum OTP limit reached. Please try after 30 minutes.'
             });
         }
-
-        // Send email
-        await transporter.sendMail(mailOptions);
-        await user.save();
-
-        res.status(200).json({ 
-            message: 'Email OTP sent successfully',
-            remainingAttempts: 5 - user.emailOtp.send_cont
+        // Send email in background
+        transporter.sendMail(mailOptions).catch(error => {
+            console.error('Background email sending failed:', error);
+            // You might want to implement a retry mechanism or notification system here
         });
+
     } catch (error) {
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Session expired' });
@@ -333,4 +341,208 @@ const sendEmailOTP = async (req, res) => {
     }
 };
 
-export { sendMobileOTP, resendMobileOTP, verifyMobileOTP, sendEmailOTP };
+const resendEmailOTP = async (req, res) => {
+    const { email } = req.body;
+    
+    try {
+        // Get token from header
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        // Verify token and extract mobile number
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const mobileNumber = decoded.mobileNumber;
+
+        // Find user
+        const user = await User.findOne({ mobileNumber });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if send limit time exists and hasn't expired
+        if (user.emailOtp?.send_limit_time && false) {
+            const timeDiff = Date.now() - new Date(user.emailOtp.send_limit_time).getTime();
+            const thirtyMinutesInMillis = 30 * 60 * 1000;
+            
+            if (timeDiff < thirtyMinutesInMillis) {
+                const remainingMinutes = Math.ceil((thirtyMinutesInMillis - timeDiff) / (60 * 1000));
+                return res.status(429).json({ 
+                    message: `Maximum OTP limit reached. Please try after ${remainingMinutes} minutes.`
+                });
+            } else {
+                // Reset counter if 30 minutes passed
+                user.emailOtp.send_cont = 0;
+                user.emailOtp.send_limit_time = null;
+            }
+        }
+
+        const otp = 550055; // For development
+        console.log('Email OTP:', otp);
+
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: true,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            },
+            tls: {
+                rejectUnauthorized: false
+            }
+        });
+
+        const mailOptions = {
+            from: {
+                name: 'Lakshmi Shree',
+                address: process.env.SMTP_USER
+            },
+            to: email,
+            subject: 'OTP Verification - Lakshmi Shree',
+            text: `Your OTP for Lakshmi Shree account verification is: ${otp}. This OTP will expire in 5 minutes.`,
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f9f9f9;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src=${process.env.BACKEND_SERVER}/assets/icons/fullLogo.png ,
+                             alt="Lakshmi Shree" 
+                             style="max-width: 250px; height: auto; margin-bottom: 20px;"
+                        />
+                        <h2 style="color: #333;">Verify Your Email</h2>
+                    </div>
+                    <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <p style="margin-bottom: 20px;">Please use the following OTP to verify your email address:</p>
+                        <div style="background-color: #f5f5f5; padding: 15px; text-align: center; border-radius: 4px;">
+                            <h1 style="color: #f05156; font-size: 32px; letter-spacing: 5px; margin: 0;">${otp}</h1>
+                        </div>
+                        <p style="margin-top: 20px; color: #666;">This OTP will expire in 5 minutes.</p>
+                        <p style="color: #999; font-size: 12px; margin-top: 30px;">If you didn't request this OTP, please ignore this email.</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+                        <p>© ${new Date().getFullYear()} Lakshmi Shree. All rights reserved.</p>
+                    </div>
+                </div>
+            `,
+            headers: {
+                'X-Priority': '1',
+                'X-MSMail-Priority': 'High',
+                'Importance': 'high'
+            },
+            priority: 'high'
+        };
+
+        // Update user's email OTP information
+        user.emailOtp = {
+            ...user.emailOtp,
+            otp,
+            expiry: Date.now() + 300000, // 5 minutes
+            send_cont: (user.emailOtp?.send_cont || 0) + 1
+        };
+
+        // Check if limit reached
+        if (user.emailOtp.send_cont >= 5  && false) {
+            user.emailOtp.send_limit_time = new Date();
+            await user.save();
+            return res.status(429).json({ 
+                message: 'Maximum OTP limit reached. Please try after 30 minutes.'
+            });
+        }
+
+        // Send email and save user
+        await transporter.sendMail(mailOptions);
+        await user.save();
+
+        res.status(200).json({ 
+            message: 'Email OTP resent successfully',
+            remainingAttempts: 5 - user.emailOtp.send_cont
+        });
+    } catch (error) {
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Session expired' });
+        }
+        console.error('Email OTP Error:', error);
+        res.status(500).json({ message: 'Error resending email OTP', error: error.message });
+    }
+};
+
+const verifyEmailOTP = async (req, res) => {
+    try {
+        // Get token from header
+        const token = req.headers.authorization?.split(' ')[1];
+        const { email, otp } = req.body;
+        
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        // Verify token and extract mobile number
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const mobileNumber = decoded.mobileNumber;
+
+        // Find user with the mobile number
+        const user = await User.findOne({ mobileNumber });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if OTP is expired
+        if (Date.now() > user.emailOtp.expiry) {
+            return res.status(400).json({ message: 'OTP has expired' });
+        }
+
+        // Verify OTP
+        if (user.emailOtp.otp !== parseInt(otp)) {
+            return res.status(400).json({ message: 'Invalid OTP' });
+        }
+
+        // Verify if the email matches
+        if (user.email !== email) {
+            return res.status(400).json({ message: 'Email mismatch' });
+        }
+
+        // Mark email as verified
+        user.emailVerified = true;
+
+        // Clear email OTP data after successful verification
+        user.emailOtp = {
+            otp: null,
+            expiry: null,
+            send_cont: 0,
+            send_limit_time: null
+        };
+
+        await user.save();
+
+        // Generate new JWT token with 24 hours validity
+        const newToken = jwt.sign(
+            { mobileNumber: user.mobileNumber }, 
+            process.env.JWT_SECRET_KEY, 
+            { expiresIn: '24h' }
+        );
+
+        res.status(200).json({
+            message: 'Email verified successfully',
+            token: newToken,
+            max_step_completed: user.max_step_completed || 0
+        });
+
+    } catch (error) {
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Session expired' });
+        }
+        res.status(500).json({ message: 'Error verifying email OTP', error: error.message });
+    }
+};
+
+export { 
+    sendMobileOTP, 
+    resendMobileOTP, 
+    verifyMobileOTP, 
+    sendEmailOTP, 
+    resendEmailOTP,
+    verifyEmailOTP 
+};

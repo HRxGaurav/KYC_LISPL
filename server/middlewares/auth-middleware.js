@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const checkAuthUser = async (req, res, next)=>{
-    const token = req.header('Authorization');
+    const token = req.headers.authorization?.split(' ')[1];
  
 
     if(!token){
@@ -12,14 +12,14 @@ const checkAuthUser = async (req, res, next)=>{
     }
 
     try {
-        const {userID} =  jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const {mobileNumber} =  jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-        //get user from Token
-        req.user= userID;        
+        //get mobile from Token
+        req.user= mobileNumber;        
         next()
         
     } catch (error) {
-        res.status(401).json({ message: 'Invalid token' });
+        res.status(401).json({ message: 'Session expired' });
     }
 }
 

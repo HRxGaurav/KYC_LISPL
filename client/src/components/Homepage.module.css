@@ -159,6 +159,33 @@
     flex-direction: column; 
 }
 
+.applicationContainer{
+    display: flex;
+    gap:15px;
+    margin-top: 30px;
+}
+
+.newUser, .existingUser{
+    background-color: #f8767a44;
+    color: #000000;
+    padding: 5px 10px;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all 0.5s ease-in-out;
+
+}
+.newUser:hover, .existingUser:hover{
+    box-shadow: 0 5px 20px #d2d2d2fa;
+}
+
+.selectedUser{
+    background-color: #f8767a;
+color: #fff;
+padding: 5px 10px;
+border-radius: 24px;
+cursor: pointer;
+transition: all 0.5s ease-in-out;
+}
 
 .registerContent::before{
     position: absolute;
@@ -184,7 +211,7 @@
 }
 .registerLog{
     margin-top: 78px;
-    height: 30%;
+    /* height: 30%; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -200,6 +227,15 @@
     font-weight: 700;
     color: #4f4f4f;
     margin-top: 30px; 
+    text-align: center;
+    /* margin-top: -50px; */
+    margin-bottom: 60px;
+}
+
+.emailOTPText{
+    /* text-align: center; */
+    /* max-width: 70%; */
+    word-break: break-all;
 }
 
 .form__input_group {
@@ -207,6 +243,7 @@
     width: 100%;
     position: relative;
     display: flex;
+    justify-content: space-between;
 }
 
 .form__input {
