@@ -1,5 +1,5 @@
 import styles from './Footer.module.css';
-// import StepToOpenAccount from './organism/StepToOpenAccount';
+import StepToOpenAccount from './organism/StepToOpenAccount';
 
 
 
@@ -11,7 +11,7 @@ const Footer = () => {
             <div className={styles.ContainerWrapper}>
                 <div className={styles.Container}>
 
-                    
+                    <StepToOpenAccount/>
 
                 </div>
             </div>
