@@ -1,7 +1,7 @@
-import styles from './StepsToOpenAccount.module.css';
+import styles from './StepToOpenAccount.module.css';
 
 
-const StepsToOpenAccount = () => {
+const StepToOpenAccount = () => {
   return (
     <>
     <h2 className={styles.mainHeading}>How to Open a Demat Account​?</h2>
@@ -66,4 +66,4 @@ const StepsToOpenAccount = () => {
   )
 }
 
-export default StepsToOpenAccount
+export default StepToOpenAccount
