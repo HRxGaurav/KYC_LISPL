@@ -1,5 +1,5 @@
 import styles from './Footer.module.css';
-import StepsToOpenAccount from './Organism/StepsToOpenAccount';
+import StepsToOpenAccount from './organism/StepsToOpenAccount';
 
 
 

@@ -244,12 +244,44 @@ const sendEmailOTP = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        // Check if send limit time exists and hasn't expired
+        if (user.emailOtp?.send_limit_time) {
+            const timeDiff = Date.now() - new Date(user.emailOtp.send_limit_time).getTime();
+            const thirtyMinutesInMillis = 30 * 60 * 1000;
+            
+            if (timeDiff < thirtyMinutesInMillis) {
+                const remainingMinutes = Math.ceil((thirtyMinutesInMillis - timeDiff) / (60 * 1000));
+                return res.status(429).json({ 
+                    message: `Maximum OTP limit reached. Please try after ${remainingMinutes} minutes.`
+                });
+            } else {
+                // Reset counter and remove limit time if 30 minutes has passed
+                user.emailOtp.send_cont = 0;
+                user.emailOtp.send_limit_time = null;
+            }
+        }
 
-
-        const otp = 550055; // For development, using static OTP
+        const otp = 550055; // For development
         console.log('Email OTP:', otp);
 
-        // Save user data
+        // Set email and OTP details BEFORE saving
+        user.email = email;
+        user.emailOtp = {
+            otp,
+            expiry: Date.now() + 300000, // 5 minutes
+            send_cont: (user.emailOtp?.send_cont || 0) + 1
+        };
+
+        // Check OTP limit
+        if (user.emailOtp.send_cont >= 5) {
+            user.emailOtp.send_limit_time = new Date();
+            await user.save();
+            return res.status(429).json({ 
+                message: 'Maximum OTP limit reached. Please try after 30 minutes.'
+            });
+        }
+
+        // Save the user data AFTER setting all fields
         await user.save();
 
         // Send success response immediately
@@ -284,7 +316,7 @@ const sendEmailOTP = async (req, res) => {
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f9f9f9;">
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <img src=${process.env.BACKEND_SERVER}/assets/icons/fullLogo.png ,
+                        <img src="${process.env.BACKEND_SERVER}/assets/icons/fullLogo.png"
                              alt="Lakshmi Shree" 
                              style="max-width: 250px; height: auto; margin-bottom: 20px;"
                         />
@@ -311,21 +343,6 @@ const sendEmailOTP = async (req, res) => {
             priority: 'high'
         };
 
-        // Update user's email and OTP information
-        user.email = email;
-        user.emailOtp = {
-            otp,
-            expiry: Date.now() + 300000, // 5 minutes
-            send_cont: (user.emailOtp?.send_cont || 0) + 1
-        };
-
-        if (user.emailOtp.send_cont >= 5  && false) {
-            user.emailOtp.send_limit_time = new Date();
-            await user.save();
-            return res.status(429).json({ 
-                message: 'Maximum OTP limit reached. Please try after 30 minutes.'
-            });
-        }
         // Send email in background
         transporter.sendMail(mailOptions).catch(error => {
             console.error('Background email sending failed:', error);
@@ -342,8 +359,6 @@ const sendEmailOTP = async (req, res) => {
 };
 
 const resendEmailOTP = async (req, res) => {
-    const { email } = req.body;
-    
     try {
         // Get token from header
         const token = req.headers.authorization?.split(' ')[1];
@@ -361,6 +376,11 @@ const resendEmailOTP = async (req, res) => {
         
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if email exists in database
+        if (!user.email) {
+            return res.status(400).json({ message: 'No email found for this user' });
         }
 
         // Check if send limit time exists and hasn't expired
@@ -401,13 +421,13 @@ const resendEmailOTP = async (req, res) => {
                 name: 'Lakshmi Shree',
                 address: process.env.SMTP_USER
             },
-            to: email,
+            to: user.email, // Using email from database instead of request body
             subject: 'OTP Verification - Lakshmi Shree',
             text: `Your OTP for Lakshmi Shree account verification is: ${otp}. This OTP will expire in 5 minutes.`,
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f9f9f9;">
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <img src=${process.env.BACKEND_SERVER}/assets/icons/fullLogo.png ,
+                        <img src="${process.env.BACKEND_SERVER}/assets/icons/fullLogo.png"
                              alt="Lakshmi Shree" 
                              style="max-width: 250px; height: auto; margin-bottom: 20px;"
                         />
@@ -499,13 +519,13 @@ const verifyEmailOTP = async (req, res) => {
             return res.status(400).json({ message: 'Invalid OTP' });
         }
 
-        // Verify if the email matches
-        if (user.email !== email) {
-            return res.status(400).json({ message: 'Email mismatch' });
-        }
+        
 
         // Mark email as verified
         user.emailVerified = true;
+
+        //Update step
+        user.max_step_completed = 1;
 
         // Clear email OTP data after successful verification
         user.emailOtp = {
@@ -527,7 +547,7 @@ const verifyEmailOTP = async (req, res) => {
         res.status(200).json({
             message: 'Email verified successfully',
             token: newToken,
-            max_step_completed: user.max_step_completed || 0
+            max_step_completed: user.max_step_completed || 1
         });
 
     } catch (error) {
@@ -538,11 +558,4 @@ const verifyEmailOTP = async (req, res) => {
     }
 };
 
-export { 
-    sendMobileOTP, 
-    resendMobileOTP, 
-    verifyMobileOTP, 
-    sendEmailOTP, 
-    resendEmailOTP,
-    verifyEmailOTP 
-};
+export { sendMobileOTP,  resendMobileOTP,  verifyMobileOTP, sendEmailOTP,  resendEmailOTP, verifyEmailOTP  };

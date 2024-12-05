@@ -310,7 +310,7 @@ const Homepage = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          email
+          
         })
       });
   
@@ -506,7 +506,7 @@ const Homepage = () => {
                           key={index}
                           id={`otp-input-${index}`}
                           className={styles.otpInput}
-                          type="text"
+                          type="number"
                           value={mobileOTP[index] || ''}
                           onChange={(e) => handleOTPInputChange(e, index)}
                           onKeyDown={(e) => handleOTPKeyDown(e, index)}
@@ -604,7 +604,7 @@ const Homepage = () => {
                           key={index}
                           id={`otp-input-${index}`}
                           className={styles.otpInput}
-                          type="text"
+                          type="number"
                           value={mobileOTP[index] || ''}
                           onChange={(e) => handleOTPInputChange(e, index)}
                           onKeyDown={(e) => handleOTPKeyDown(e, index)}

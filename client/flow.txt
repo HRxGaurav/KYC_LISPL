@@ -1,0 +1,2 @@
+const flow = [ email , get_started, pan, profile    ];
+                1           2        3      4
