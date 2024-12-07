@@ -1,11 +1,14 @@
 .ContainerWrapper{
     background-image: linear-gradient(0deg, #ffb3b6 -45.37%, rgba(255, 255, 255, 0) 80%);
     padding-bottom: 10px;
+    /* display: flex; */
+    /* justify-content: center; */
 }
 
 .Container {
     padding: 0 6vw;
     margin-top: 100px;
+
     
 
 }

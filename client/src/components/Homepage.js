@@ -210,6 +210,7 @@ const Homepage = () => {
   };
 
   const resendMobileOTP = async () => {
+    setMobileOTP('')
     if (!isResendEnabled) return;
 
     // Get the token from localStorage
@@ -296,6 +297,7 @@ const Homepage = () => {
   };
 
   const resendEmailOTP = async () => {
+    setMobileOTP('')
     if (!isResendEnabled) return;
     
   
@@ -664,7 +666,7 @@ const Homepage = () => {
         </div>
       </div>
 
-      {/* <Footer /> */}
+      <Footer />
     </>
   )
 }
