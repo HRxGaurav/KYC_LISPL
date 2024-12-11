@@ -40,9 +40,19 @@ const sendMobileOTP = async (req, res) => {
         console.log(otp);
 
         if (!user) {
-            // Create new user with initial counter
+            // Find the last user to determine the next LSID
+            const lastUser = await User.findOne({}, {}, { sort: { 'lsid': -1 } });
+            let nextLSID = 'ls1';
+            
+            if (lastUser && lastUser.lsid) {
+                const lastLSIDNumber = parseInt(lastUser.lsid.replace('ls', ''), 10);
+                nextLSID = `ls${lastLSIDNumber + 1}`;
+            }
+
+            // Create new user with initial counter and LSID
             user = new User({
                 mobileNumber,
+                lsid: nextLSID,
                 otp: {
                     otp,
                     expiry: Date.now() + 300000, // 5 minutes
@@ -76,8 +86,7 @@ const sendMobileOTP = async (req, res) => {
 
         res.status(200).json({ 
             message: 'OTP sent successfully', 
-            token,
-            remainingAttempts: 5 - user.otp.send_cont
+            token
         });
     } catch (error) {
         res.status(500).json({ message: 'Error sending OTP', error });
@@ -108,10 +117,10 @@ const resendMobileOTP = async (req, res) => {
         // Check if send limit time exists and hasn't expired
         if (user.otp.send_limit_time) {
             const timeDiff = Date.now() - new Date(user.otp.send_limit_time).getTime();
-            const thirtyMinutesInMillis = 30 * 60 * 1000; // 30 minutes in milliseconds
+            const fiveMinutesInMillis = 5 * 60 * 1000; // 5 minutes in milliseconds
             
-            if (timeDiff < thirtyMinutesInMillis) {
-                const remainingMinutes = Math.ceil((thirtyMinutesInMillis - timeDiff) / (60 * 1000));
+            if (timeDiff < fiveMinutesInMillis) {
+                const remainingMinutes = Math.ceil((fiveMinutesInMillis - timeDiff) / (60 * 1000));
                 return res.status(429).json({ 
                     message: `Maximum OTP limit reached. Please try after ${remainingMinutes} minutes.`
                 });
@@ -247,10 +256,10 @@ const sendEmailOTP = async (req, res) => {
         // Check if send limit time exists and hasn't expired
         if (user.emailOtp?.send_limit_time) {
             const timeDiff = Date.now() - new Date(user.emailOtp.send_limit_time).getTime();
-            const thirtyMinutesInMillis = 30 * 60 * 1000;
+            const fiveMinutesInMillis = 5 * 60 * 1000;
             
-            if (timeDiff < thirtyMinutesInMillis) {
-                const remainingMinutes = Math.ceil((thirtyMinutesInMillis - timeDiff) / (60 * 1000));
+            if (timeDiff < fiveMinutesInMillis) {
+                const remainingMinutes = Math.ceil((fiveMinutesInMillis - timeDiff) / (60 * 1000));
                 return res.status(429).json({ 
                     message: `Maximum OTP limit reached. Please try after ${remainingMinutes} minutes.`
                 });
@@ -384,12 +393,12 @@ const resendEmailOTP = async (req, res) => {
         }
 
         // Check if send limit time exists and hasn't expired
-        if (user.emailOtp?.send_limit_time && false) {
+        if (user.emailOtp?.send_limit_time) {
             const timeDiff = Date.now() - new Date(user.emailOtp.send_limit_time).getTime();
-            const thirtyMinutesInMillis = 30 * 60 * 1000;
+            const fiveMinutesInMillis = 5 * 60 * 1000;
             
-            if (timeDiff < thirtyMinutesInMillis) {
-                const remainingMinutes = Math.ceil((thirtyMinutesInMillis - timeDiff) / (60 * 1000));
+            if (timeDiff < fiveMinutesInMillis) {
+                const remainingMinutes = Math.ceil((fiveMinutesInMillis - timeDiff) / (60 * 1000));
                 return res.status(429).json({ 
                     message: `Maximum OTP limit reached. Please try after ${remainingMinutes} minutes.`
                 });
@@ -518,8 +527,6 @@ const verifyEmailOTP = async (req, res) => {
         if (user.emailOtp.otp !== parseInt(otp)) {
             return res.status(400).json({ message: 'Invalid OTP' });
         }
-
-        
 
         // Mark email as verified
         user.emailVerified = true;

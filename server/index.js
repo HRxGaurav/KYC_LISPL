@@ -4,13 +4,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
 import connectDB from './config/connectDB.js';
-import concernRoutes from './routes/concernRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import fileRoutes from './routes/fileRoutes.js';
-import topSolutionRoutes from './routes/topSolutionRoutes.js';
-import topConcernRoutes from './routes/topConcernRoutes.js';
 import mailRoutes from './routes/mailRoutes.js';
 import livenessCheckRoutes from './routes/livenessCheckRoutes.js';
+import kycRoutes from './routes/kycRoutes.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +42,7 @@ app.get('/health', (req, res) => {
 //Load Routes
 app.use('/api', livenessCheckRoutes);
 app.use('/api', authRoutes);
+app.use('/api', kycRoutes);
 // app.use(concernRoutes);
 // app.use(topSolutionRoutes);
 // app.use(topConcernRoutes);

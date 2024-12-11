@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import logo from '../assets/icons/logo.png'
 import fullLogo from '../assets/icons/fullLogo.png'
 import styles from './Homepage.module.css'
@@ -24,6 +25,8 @@ const Homepage = () => {
   const [timer, setTimer] = useState(30);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState('new');
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -375,7 +378,7 @@ const Homepage = () => {
         // Clear OTP and error
         setMobileOTP('');
         setError('');
-        window.alert('email verified')
+        navigate(`/pan`)
 
         // Move to next page or handle success
         // setPage(4); // Uncomment and adjust page number as needed
@@ -666,7 +669,7 @@ const Homepage = () => {
         </div>
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </>
   )
 }

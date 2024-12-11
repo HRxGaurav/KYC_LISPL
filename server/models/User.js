@@ -35,8 +35,33 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    panDetails: {
+        type: Object,
+        default: null
+    },
+    panConfirmed: {
+        type: Boolean,
+        default: false
+    },
+    panVerificationDetails: {
+        verifiedAt: { type: Date, default: Date.now },
+        status: { type: String, default: 'Pending' },
+        details: { type: Object, default: null }
+    },
+    panApiCallCount: {
+        type: Number,
+        default: 0
+    },
+    lastPanApiCallTime: {
+        type: Date,
+        default: null
+    },
     max_step_completed:{
       type:String
+    },
+    lsid: {
+        type: String,
+        unique: true
     },
     emailOtp: {
         otp: Number,

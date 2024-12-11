@@ -18,12 +18,18 @@ code {
 
 /* In your CSS file (e.g., styles.css) */
 @font-face {
-  font-family: 'CircularXXWeb';
+  font-family: 'CircularXXWeb-Book';
   src: url('./assets/fonts/CircularXXWeb-Book.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'CircularXXWeb-Medium';
+  src: url('./assets/fonts/CircularXXWeb-Medium.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
 
 body {
-  font-family: 'CircularXXWeb', sans-serif;
+  font-family: 'CircularXXWeb-Book', sans-serif;
 }

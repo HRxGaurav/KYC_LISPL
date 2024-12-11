@@ -1,0 +1,344 @@
+.MainContainer{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 50px;
+}
+
+.MainWrapper{
+border: 1px solid #ffaeae;
+border-radius: 20px;
+background-color: #fff;
+box-shadow: 0 0 15px 3px #817e7e1a;
+width: 50vw;
+height: 100%;
+}
+
+.topPANDiv{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #e4e4e4;
+    padding: 12px;
+}
+
+.topPanText{
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 28px;
+    color: #363636;
+    margin-top: 5px;
+}
+.topClockDiv{
+    display: flex;
+    gap: 5px;
+    margin-top: 7px;
+}
+
+.clockIcon{
+    height: 20px;
+    width: 20px;
+    align-self: center;
+}
+.clockText{
+    font-size: 14px;
+    color: #817E7E;
+}
+
+
+
+.topPanText{
+    display: flex;
+}
+
+
+.panDemoDiv{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.EnterYourPan{
+    font-family: 'CircularXXWeb-Medium';
+    font-size: 16px;
+    color: #040404CC;
+}
+
+.SamplePANText{
+    font-size: 12px;
+    color: #817E7E;
+    font-weight: 500;
+}
+
+.panInputDiv{
+    display: flex;
+    flex-direction: column;
+    padding: 0 25%;
+    margin-top: 50px;
+}
+
+.panLabel{
+    font-size: 12px;
+    color: #040404CC;
+    margin-left: 2px;
+    margin-bottom: 5px;
+}
+.panInput {
+    border: none;
+    border-bottom: 1px solid #fa7a70;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    outline: none;
+    font-size: 16px;
+    color: #dd6565; 
+}
+
+.panInput::placeholder {
+    color: grey;
+}
+
+.panInput:focus {
+    border: none;
+    border-bottom: 1px solid #f44336;
+    outline: none;
+    box-shadow: none;
+}
+
+.errorMessage{
+    font-size: 12px;
+    color: #f05156;
+    margin-top: 5px;
+}
+.shieldDiv{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.shieldText{
+    font-size: 14px;
+    color: #404040BF;
+    margin-left: 5px;
+}
+
+.Line{
+    border-bottom: 1px solid #e4e4e4;
+    margin-top: 50px;
+}
+
+.verifyButton{
+    background-image: linear-gradient(to top, #f73439, #f8777b) !important;
+    font-size: 16px;
+    font-weight: 400;
+    font-stretch: normal;
+    color: #fff;
+    border-radius: 8px !important;
+    border: none;
+    cursor: pointer;
+    padding: 6px 30px;
+    margin: 10px auto;
+    margin-left: 50%;
+    transform: translate(-50%);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.confirmationDiv{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2
+}
+
+.confirmationWrapper{
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.confirmationItemDiv{
+    width: 80%;
+}
+
+
+.loader{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2
+}
+
+.loaderDiv{
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.fetchingText{
+    margin-top: 50px;
+    margin-bottom: 30px;
+    font-size: 14px;
+    color: #040404CC;
+    font-family: 'CircularXXWeb-Medium';
+}
+
+.loadingText{
+    color: #e78a00;
+    font-size: 12px;
+    text-align: center;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.backgroundBlur{
+    position: absolute;
+    /* overflow: hidden; */
+    width: 100vw;
+    /* height: 100vh; */
+    top: 0;
+    left: 0;
+    background: linear-gradient(to right, #fdfdfd, #fdfdfd);
+    display: flex;
+    flex-grow: 1;
+    z-index: -1;
+}
+.backgroundBlur div {
+    position: absolute;
+    border-radius: 100%;
+    height: 0;
+    filter: blur(200px);
+    opacity: .4;
+}
+.backgroundBlur div:nth-child(1) {
+    background: linear-gradient(132deg, #FF9A01 0%, #FF9A01 100%);
+    width: 15%;
+    padding-top: 70%;
+    left: 5%;
+    top: 70%;
+    transform: translate(-50%) translateY(-50%);
+}
+.backgroundBlur div:nth-child(2) {
+    background: linear-gradient(132deg, #D75EFD 0%, #D75EFD 100%);
+    width: 17%;
+    padding-top: 68%;
+    left: 100% !important;
+    top: -40% !important;
+    transform: translate(-80%) translateY(20%);
+    rotate: 90deg;
+}
+.backgroundBlur div:nth-child(3) {
+    background: linear-gradient(132deg, #60ECBA 0%, #60ECBA 100%);
+    width: 25%;
+    padding-top: 70%;
+    left: 50%;
+    bottom: 5%;
+    transform: translate(-50%) translateY(20%);
+}
