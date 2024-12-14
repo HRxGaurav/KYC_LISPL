@@ -1,0 +1,17 @@
+.successContainer {
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    height: 100vh; /* Full viewport height */
+    padding: 20px;
+    background-color: #ffffff; /* White background */
+    border: 2px solid #4caf50; /* Green border */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.successImage {
+    width: 100px; /* Adjust size as needed */
+    margin-bottom: 20px;
+}

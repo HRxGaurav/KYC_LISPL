@@ -1,0 +1,7 @@
+"675c222d33ac97fd1d00323c"
+"675c274333ac97fd1d0033ac"
+
+https://kycapi.rsbwellness.com/assets/icons/fullLogo.png
+
+http://localhost:9001/digilocker-failed?requestId=675d107733ac97fd1d003c55&status=error&scope=
+http://localhost:9001/digilocker-success?requestId=675d131b33ac97fd1d003c64&status=success&scope=dXNlcmRldGFpbHMsZmlsZXMuaXNzdWVkZG9jcyxlbWFpbCxwaWN0dXJlLGlzc3VlZC9pbi5nb3YudWlkYWktQURIQVItMWZjMjViZTJhZGY3ZmI3ZjgyNzQ4MjdhY2I0YWY1YmE%3D

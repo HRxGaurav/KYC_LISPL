@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../atom/Header";
 import styles from "./PANCard.module.css";
 import TopPanIcon from "../../assets/icons/KYCiconsPAN.svg";
@@ -7,11 +8,12 @@ import shield from "../../assets/icons/warn.svg";
 import PAN_1 from "../../assets/images/PAN_1.svg";
 
 const PANCard = () => {
+  const navigate = useNavigate();
   const [panNumber, setPanNumber] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [countdown, setCountdown] = useState(10);
   const [PANData, setPANData] = useState({});
-  const [isLoading, setIsLoading]=useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [isOpenConfirmationModal, setIsOpenConfirmationModal] = useState(false);
 
   const validatePAN = (pan) => {
@@ -20,14 +22,13 @@ const PANCard = () => {
   };
 
   const handleSubmit = async (e) => {
-    
     const token = localStorage.getItem("authToken");
     e.preventDefault();
     if (!validatePAN(panNumber)) {
       setErrorMessage("Enter a valid PAN number");
       return;
     }
-    setIsLoading(true)
+    setIsLoading(true);
     setErrorMessage("");
     try {
       const response = await fetch(
@@ -42,13 +43,38 @@ const PANCard = () => {
         }
       );
       const data = await response.json();
-      setIsOpenConfirmationModal(true)
-      setPANData(data.panDetails.result)
-      setIsLoading(false)
+      setIsOpenConfirmationModal(true);
+      setPANData(data.panDetails.result);
+      setIsLoading(false);
       console.info(data);
     } catch (error) {
-      setIsLoading(false)
+      setIsLoading(false);
       console.error("Error verifying PAN:", error);
+    }
+  };
+
+  const handlePanConfirmation = async () => {
+    const token = localStorage.getItem("authToken");
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/confirm_pan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ panData: PANData })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        console.log('PAN confirmed successfully');
+        setIsOpenConfirmationModal(false);
+        navigate('/digilocker');
+      } else {
+        console.error('Failed to confirm PAN:', data.message);
+      }
+    } catch (error) {
+      console.error('Error confirming PAN:', error);
     }
   };
 
@@ -96,9 +122,8 @@ const PANCard = () => {
           </div>
 
           <div className={styles.panInputDiv}>
-
             <div className={styles.panLabel}>Enter PAN Number*</div>
-            
+
             <input
               type="text"
               value={panNumber}
@@ -109,7 +134,9 @@ const PANCard = () => {
               className={styles.panInput}
             />
 
-            {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
+            {errorMessage && (
+              <div className={styles.errorMessage}>{errorMessage}</div>
+            )}
           </div>
 
           <div className={styles.shieldDiv}>
@@ -121,52 +148,66 @@ const PANCard = () => {
 
           <div className={styles.Line}></div>
 
-          <button className={styles.verifyButton} onClick={handleSubmit}>Verify PAN</button>
+          <button className={styles.verifyButton} onClick={handleSubmit}>
+            Verify PAN
+          </button>
         </div>
       </div>
 
+      {isLoading && (
+        <div className={styles.loader}>
+          <div className={styles.loaderDiv}>
+            <div className={styles.fetchingText}>Fetching PAN Information</div>
+            <div>
+              <div className={styles.loadingText}>
+                Please wait, this may take a while!
+              </div>
+              <div className={styles.loadingText}>
+                Do not press back key or refresh this page
+              </div>
+            </div>
 
-      {isLoading && <div className={styles.loader}>
-        <div className={styles.loaderDiv}>
-
-          <div className={styles.fetchingText}>Fetching PAN Information</div>
-          <div>
-          <div className={styles.loadingText}>Please wait, this may take a while!</div>
-          <div className={styles.loadingText}>Do not press back key or refresh this page</div>
+            <div className={styles.shieldDiv}>
+              <img
+                src={shield}
+                alt="shield Icon"
+                className={styles.shieldIcon}
+              />
+              <div className={styles.shieldText}>
+                Your account details are safe & secure with us.
+              </div>
+            </div>
           </div>
-
-          <div className={styles.shieldDiv}>
-            <img src={shield} alt="shield Icon" className={styles.shieldIcon} />
-            <div className={styles.shieldText}>Your account details are safe & secure with us.</div>
-          </div>
-
         </div>
-      </div>}
+      )}
 
-      {isOpenConfirmationModal && <div className={styles.confirmationDiv}>
-        <div className={styles.confirmationWrapper}>
+      {isOpenConfirmationModal && (
+        <div className={styles.confirmationDiv}>
+          <div className={styles.confirmationWrapper}>
+            <div>Fetched details from Income Tax Department</div>
 
-          <div>Fetched details from Income Tax Department</div>
+            <div className={styles.confirmationItemDiv}>
+              <div>Name</div>
+              <div>{PANData.name}</div>
+              <div>PAN Number</div>
+              <div>{PANData.number}</div>
+              <div>Fathers Name</div>
+              <div>{PANData.fatherName}</div>
+              <div>DOB</div>
+              <div>{PANData.dateOfBirth}</div>
+            </div>
 
-          <div className={styles.confirmationItemDiv}>
-
-          <div>Name</div>
-          <div>{PANData.name}</div>
-          <div>PAN Number</div>
-          <div>{PANData.number}</div>
-          <div>Fathers Name</div>
-          <div>{PANData.fatherName}</div>
-          <div>DOB</div>
-          <div>{PANData.dateOfBirth}</div>
-
+            <button
+              className={styles.confirmButton}
+              onClick={handlePanConfirmation}
+            >
+              Confirm
+            </button>
           </div>
-
-
-
         </div>
-      </div>}
+      )}
     </>
-  );               
+  );
 };
 
 export default PANCard;

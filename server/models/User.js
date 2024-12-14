@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema({
         default: null
     },
     max_step_completed:{
-      type:String
+      type:Number
     },
     lsid: {
         type: String,
@@ -68,6 +68,13 @@ const userSchema = new mongoose.Schema({
         expiry: Date,
         send_cont: Number,
         send_limit_time: Date
+    },
+    digilocker_request_id:{
+        type:String
+    },
+    digilocker_details: {
+        type: Object,
+        default: null
     }
 });
 

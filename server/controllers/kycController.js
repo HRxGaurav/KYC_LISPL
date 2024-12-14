@@ -26,7 +26,6 @@ const encrypt = (text) => {
     decrypted += decipher.final("utf8");
     return decrypted;
   };
-
   
 
 const checkPAN = async (req, res) => {
@@ -186,6 +185,9 @@ const confirmPAN = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        //Update step
+        user.max_step_completed = 2;
+
         // Update user details
         user.panConfirmed = true;
         user.PAN = user.panDetails.number;
@@ -197,7 +199,7 @@ const confirmPAN = async (req, res) => {
         await user.save();
 
         // Return successful response
-        res.status(200).json({ message: "PAN confirmed successfully" });
+        res.status(200).json({ success: true, message: "PAN confirmed successfully" });
     } catch (error) {
         console.error("PAN Confirmation Error:", error);
         res.status(500).json({
@@ -207,4 +209,151 @@ const confirmPAN = async (req, res) => {
     }
 };
 
-export { checkPAN, confirmPAN };
+const createDigilockerUrl = async (req, res) => {
+  
+  
+    try {
+        // Extract JWT token from Authorization header
+        const token = req.headers.authorization?.split(" ")[1];
+
+        if (!token) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+        // Verify JWT token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        } catch (tokenError) {
+            return res.status(401).json({ message: "Unauthorized: Invalid token" });
+        }
+
+        // Find user by mobile number from decoded token
+        const user = await User.findOne({ mobileNumber: decoded.mobileNumber });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Prepare API request
+        const apiUrl = `${process.env.API_LINK}/api/v3/digilocker/createUrl`;
+        const date = new Date();
+        date.setMonth(date.getMonth() + 1);
+        const consentValidTill = Math.floor(date.getTime() / 1000);
+        const requestData = {
+            signup: true,
+            redirectUrl: "https://www.lakshmishree.com/",
+            redirectTime: "1",
+            callbackUrl: "https://signtest123.requestcatcher.com/",
+            successRedirectUrl: `${process.env.FRONTEND_DEPLOY_URL}/digilocker-success`,
+            successRedirectTime: "5",
+            failureRedirectUrl: `${process.env.FRONTEND_DEPLOY_URL}/digilocker-failed`,
+            failureRedirectTime: "5",
+            logoVisible: "true",
+            logo: "https://kycapi.rsbwellness.com/assets/icons/fullLogo.png",
+            supportEmailVisible: "true",
+            supportEmail: "support@lakshmishree.com",
+            docType: ["ADHAR"],
+            purpose: "kyc",
+            getScope: true,
+            consentValidTill: consentValidTill,
+            showLoaderState: true,
+            internalId: "<Internal ID>",
+            companyName: "Lakshmishree Investment & Securities Limited",
+            favIcon: "https://kycapi.rsbwellness.com/assets/icons/fullLogo.png"
+            // persistPassword: ""
+        };
+
+        // Make API request
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                Authorization: process.env.ACCESS_TOKEN_SECRET,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        // Check API response
+        if (response.ok) {
+            const data = await response.json();
+            user.digilocker_request_id = data.result.requestId;
+            await user.save();
+            return res.status(200).json({ message: "Digilocker URL created successfully", url:data.result.url });
+        } else {
+            const errorData = await response.json();
+            return res.status(response.status).json({ message: "Failed to create Digilocker URL", error: errorData });
+        }
+    } catch (error) {
+        console.error("Error creating Digilocker URL:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
+const getDigilockerDetails = async (req, res) => {
+  // Extract JWT token from Authorization header
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+  }
+
+  let decoded;
+  try {
+      // Verify JWT token
+      decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  } catch (tokenError) {
+      return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+  }
+
+  // Find user by mobile number from decoded token
+  const user = await User.findOne({ mobileNumber: decoded.mobileNumber });
+  if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+  }
+
+  // Extract digilocker_request_id from user
+  const { digilocker_request_id } = user;
+  if (!digilocker_request_id) {
+      return res.status(404).json({ message: 'Digilocker request ID not found' });
+  }
+
+  // Prepare API request
+  const apiUrl = `${process.env.API_LINK}/api/v3/digilocker/geteaadhaar`;
+  const requestData = {
+      requestId: digilocker_request_id,
+      extraDigitalCertificateParams: true
+  };
+
+  try {
+      // Make API request
+      const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              Authorization: process.env.ACCESS_TOKEN_SECRET,
+          },
+          body: JSON.stringify(requestData),
+      });
+
+      // Check API response
+      if (response.ok) {
+          const data = await response.json();
+          // Store the response in digilocker_details
+          user.digilocker_details = data.result;
+          await user.save();
+          return res.status(200).json({ message: 'Digilocker details retrieved successfully', data });
+      } else {
+          const errorData = await response.json();
+          return res.status(response.status).json({ message: 'Failed to retrieve Digilocker details', error: errorData });
+      }
+  } catch (error) {
+      console.error('Error retrieving Digilocker details:', error);
+      return res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+
+
+
+
+export { checkPAN, confirmPAN, createDigilockerUrl, getDigilockerDetails };
