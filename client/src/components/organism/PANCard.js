@@ -5,6 +5,7 @@ import styles from "./PANCard.module.css";
 import TopPanIcon from "../../assets/icons/KYCiconsPAN.svg";
 import clock from "../../assets/icons/ClockTimer.svg";
 import shield from "../../assets/icons/warn.svg";
+import Lion from "../../assets/icons/Lion.png";
 import PAN_1 from "../../assets/images/PAN_1.svg";
 
 const PANCard = () => {
@@ -187,14 +188,77 @@ const PANCard = () => {
             <div>Fetched details from Income Tax Department</div>
 
             <div className={styles.confirmationItemDiv}>
-              <div>Name</div>
-              <div>{PANData.name}</div>
+
+
+
+              <div className={styles.PanDesign}>
+
+
+              <div className={styles.PanInner}>
+
+                <div className={styles.PanAuthority}>
+                  <div>
+                    
+                  {/* <div className={styles.PanAuthorityText}>आयकर विभाग</div> */}
+                  <div className={styles.PanAuthorityText}>INCOME TAX DEPARTMENT</div>
+                  </div>
+                  <img src={Lion} alt="Lion Icon" className={styles.LionImage} />
+                  <div className={styles.PanAuthorityText}>GOVT. OF INDIA</div>
+                </div>
+
+                <div className={styles.PanNumberContainer}>
+                  <div className={styles.PanNumberHeading}>Permanent Account Number</div>
+                  <div className={styles.PanNumberText}>{PANData.number}</div>
+
+                </div>
+
+
+                <div className={styles.PanDetailContainerTop}>
+
+                  <div className={styles.PanNameContainer}> 
+                    <div className={styles.PanName}>Name</div>
+                    <div className={styles.PanNameValue}>{PANData.name}</div>
+                  </div>
+
+                </div>
+
+                <div className={styles.PanDetailContainer}>
+
+                  <div className={styles.PanNameContainer}> 
+                    <div className={styles.PanName}>Father's Name</div>
+                    <div className={styles.PanNameValue}>{PANData.fatherName}</div>
+                  </div>
+
+                </div>
+
+                <div className={styles.PanDetailContainer}>
+
+                  <div className={styles.PanNameContainer}> 
+                    <div className={styles.PanName}>Date of Birth</div>
+                    <div className={styles.PanNameValue}>{PANData.dateOfBirth}</div>
+                  </div>
+
+                </div>
+              </div>
+
+              </div>
+
+
+
+
+              {/* <div>Name</div>
+              <div>{"PANData.name"}</div>
               <div>PAN Number</div>
-              <div>{PANData.number}</div>
+              <div>{"PANData.number"}</div>
               <div>Fathers Name</div>
-              <div>{PANData.fatherName}</div>
+              <div>{"PANData.fatherName"}</div>
               <div>DOB</div>
-              <div>{PANData.dateOfBirth}</div>
+              <div></div> */}
+
+
+
+
+
             </div>
 
             <button
