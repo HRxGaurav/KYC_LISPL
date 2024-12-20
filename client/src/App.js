@@ -8,6 +8,7 @@ import DigiLockerLanding from './components/organism/DigiLockerLanding';
 import DigiLockerSuccess from './components/organism/DigiLockerSuccess';
 import DigiLockerFailed from './components/organism/DigiLockerFailed';
 import BankVerification from './components/organism/BankVerification';
+import IPV from './components/organism/IPV';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/digilocker-success" element={<DigiLockerSuccess />} />
         <Route path="/digilocker-failed" element={<DigiLockerFailed />} />
         <Route path="/bank-verification" element={<BankVerification />} />
+        <Route path="/person-verification" element={<IPV />} />
       </Routes>
       <Toaster
         position="top-center"

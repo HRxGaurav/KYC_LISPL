@@ -352,8 +352,181 @@ const getDigilockerDetails = async (req, res) => {
   }
 };
 
+const hybridBankAccountVerification = async (req, res) => {
+    try {
+        // Extract JWT token from Authorization header
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        // Verify JWT token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        } catch (tokenError) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        // Find user by mobile number from decoded token
+        const user = await User.findOne({ mobileNumber: decoded.mobileNumber });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Extract account number and IFSC code from request body
+        const { beneficiaryAccount, beneficiaryIFSC } = req.body;
+
+        // Prepare API request
+        const apiUrl = `${process.env.API_LINK}/api/v3/bankaccountverification/bankaccountverifications`;
+        const requestData = { beneficiaryAccount, beneficiaryIFSC };
+
+        // Make API request
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: process.env.ACCESS_TOKEN_SECRET,
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        // Check API response
+        if (response.ok) {
+            const data = await response.json();
+            return res.status(200).json({ message: 'Bank account verified successfully', data });
+        } else {
+            const errorData = await response.json();
+            return res.status(response.status).json({ message: 'Failed to verify bank account', error: errorData });
+        }
+    } catch (error) {
+        console.error('Bank Verification Error:', error);
+        res.status(500).json({
+            message: 'Internal server error during bank verification',
+            error: error.message,
+        });
+    }
+};
+
+const reversePennyDropCreateLink = async (req, res) => {
+    try {
+        // Extract JWT token from Authorization header
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        // Verify JWT token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        } catch (tokenError) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        // Find user by mobile number from decoded token
+        const user = await User.findOne({ mobileNumber: decoded.mobileNumber });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Prepare API request
+        const apiUrl = `${process.env.API_LINK}/api/v3/bankaccountverification/reversepennydrop/createlink`;
+
+        // Prepare the body with only the callbackUrl
+        const requestBody = {
+            callbackUrl: "https://callback_url.com"
+        };
+
+        // Make API request
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: process.env.ACCESS_TOKEN_SECRET,
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        // Check API response
+        if (response.ok) {
+            const data = await response.json();
+            return res.status(200).json({ message: 'Reverse penny drop details retrieved successfully', data });
+        } else {
+            const errorData = await response.json();
+            return res.status(response.status).json({ message: 'Failed to retrieve reverse penny drop details', error: errorData });
+        }
+    } catch (error) {
+        console.error('Reverse Penny Drop Verification Error:', error);
+        res.status(500).json({
+            message: 'Internal server error during reverse penny drop verification',
+            error: error.message,
+        });
+    }
+};
+
+
+const verifyReversePennyDrop = async (req, res) => {
+    try {
+        // Extract JWT token from Authorization header
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        // Verify JWT token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        } catch (tokenError) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        // Find user by mobile number from decoded token
+        const user = await User.findOne({ mobileNumber: decoded.mobileNumber });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Extract verificationId from request body
+        const { verificationId } = req.body;
+
+        // Prepare API request
+        const apiUrl = `${process.env.API_LINK}/api/v3/bankaccountverification/reversepennydrop/get-details`;
+        const requestData = {
+            verificationId: verificationId
+        };
+
+        // Make API request
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: process.env.ACCESS_TOKEN_SECRET,
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        // Check API response
+        if (response.ok) {
+            const data = await response.json();
+            return res.status(200).json({ message: 'Reverse penny drop details retrieved successfully', data });
+        } else {
+            const errorData = await response.json();
+            return res.status(response.status).json({ message: 'Failed to retrieve reverse penny drop details', error: errorData });
+        }
+    } catch (error) {
+        console.error('Reverse Penny Drop Verification Error:', error);
+        res.status(500).json({
+            message: 'Internal server error during reverse penny drop verification',
+            error: error.message,
+        });
+    }
+};
 
 
 
-
-export { checkPAN, confirmPAN, createDigilockerUrl, getDigilockerDetails };
+export { checkPAN, confirmPAN, createDigilockerUrl, getDigilockerDetails, hybridBankAccountVerification, reversePennyDropCreateLink, verifyReversePennyDrop };
